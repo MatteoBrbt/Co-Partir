@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CovoiPoint - Test candidats</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f7fb; color: #1a2236; }
+    .topbar {
+      padding: 10px 14px;
+      background: #fff;
+      border-bottom: 1px solid #e5e9f0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .topbar a {
+      color: #185FA5;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid #dbe7f3;
+      border-radius: 8px;
+      padding: 5px 10px;
+      background: #fff;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      min-height: calc(100vh - 53px);
+    }
+    .panel {
+      background: #fff;
+      border-right: 1px solid #e5e9f0;
+      padding: 14px;
+      overflow: auto;
+    }
+    .panel h1 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      color: #185FA5;
+    }
+    .panel .muted {
+      color: #64748b;
+      font-size: 12px;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      margin: 6px 0;
+    }
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,0.2);
+      flex-shrink: 0;
+    }
+    .section-title {
+      margin-top: 14px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+    }
+    .stat {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      font-size: 13px;
+      margin: 5px 0;
+    }
+    #map { height: calc(100vh - 53px); }
+    .no-data {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: calc(100vh - 53px);
+      color: #64748b;
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .panel { border-right: none; border-bottom: 1px solid #e5e9f0; }
+      #map { height: 62vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a href="../index.html">← Retour</a>
+    <strong>Test candidats - carte complète</strong>
+  </div>
+
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    (function () {
+      function escapeHtml(value) {
+        return String(value ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      const raw = sessionStorage.getItem('covoipoint_result');
+      if (!raw) {
+        document.getElementById('root').innerHTML = '<div class="no-data">Aucun résultat en session. Lance un calcul depuis la page d\'accueil.</div>';
+        return;
+      }
+
+      const data = JSON.parse(raw);
+      const debug = data.debugCandidates || {};
+      const startPoints = data.startPoints || [];
+      const destination = data.destination;
+      const meetingPoint = data.meetingPoint;
+      const bboxText = debug.bbox
+        ? `${debug.bbox.minLat.toFixed(5)}, ${debug.bbox.minLon.toFixed(5)} -> ${debug.bbox.maxLat.toFixed(5)}, ${debug.bbox.maxLon.toFixed(5)}`
+        : 'non disponible';
+
+      const root = document.getElementById('root');
+      root.innerHTML = `
+        <div class="layout">
+          <aside class="panel">
+            <h1>Points testés</h1>
+            <div class="muted">Visualisation debug de tous les points calculés par le moteur.</div>
+
+            <div class="section-title">Légende</div>
+            <div class="legend-item"><span class="swatch" style="background:#3b82f6"></span> Départs</div>
+            <div class="legend-item"><span class="swatch" style="background:#16a34a"></span> Destination</div>
+            <div class="legend-item"><span class="swatch" style="background:#f59e0b"></span> Point final retenu</div>
+            <div class="legend-item"><span class="swatch" style="background:#a855f7"></span> Raw candidats (avant filtres)</div>
+            <div class="legend-item"><span class="swatch" style="background:#22c55e"></span> InBox</div>
+            <div class="legend-item"><span class="swatch" style="background:#14b8a6"></span> Final candidats évalués</div>
+
+            <div class="section-title">Compteurs</div>
+            <div class="stat"><span>Raw</span><strong>${debug.counts?.raw ?? '—'}</strong></div>
+            <div class="stat"><span>InBox</span><strong>${debug.counts?.inBox ?? '—'}</strong></div>
+            <div class="stat"><span>Final</span><strong>${debug.counts?.final ?? '—'}</strong></div>
+
+            <div class="section-title">BBox</div>
+            <div class="muted">
+              ${escapeHtml(bboxText)}
+            </div>
+          </aside>
+          <div id="map"></div>
+        </div>
+      `;
+
+      const map = L.map('map');
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap © CARTO',
+        subdomains: 'abcd',
+        maxZoom: 19,
+      }).addTo(map);
+
+      function addGroup(points, color, radius, label, fillOpacity) {
+        if (!Array.isArray(points)) return [];
+        return points
+          .filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lon))
+          .map((p, idx) => {
+            const marker = L.circleMarker([p.lat, p.lon], {
+              radius,
+              color,
+              weight: 1,
+              fillColor: color,
+              fillOpacity: fillOpacity ?? 0.7,
+            }).addTo(map);
+            const cat = p._cat ? `<br>cat: ${escapeHtml(p._cat)}` : '';
+            marker.bindPopup(`<b>${escapeHtml(label)}</b><br>#${idx + 1}${cat}<br>${p.lat.toFixed(6)}, ${p.lon.toFixed(6)}`);
+            return [p.lat, p.lon];
+          });
+      }
+
+      const boundsPts = [];
+
+      boundsPts.push(...addGroup(debug.rawCandidates, '#a855f7', 4, 'Raw candidat', 0.22));
+      boundsPts.push(...addGroup(debug.inBoxCandidates, '#22c55e', 4, 'InBox candidat', 0.25));
+      boundsPts.push(...addGroup(debug.finalCandidates, '#14b8a6', 6, 'Final candidat', 0.8));
+
+      startPoints.forEach((p, i) => {
+        const startAddress = escapeHtml(p.address || '');
+        const marker = L.circleMarker([p.lat, p.lon], {
+          radius: 8,
+          color: '#1d4ed8',
+          weight: 2,
+          fillColor: '#3b82f6',
+          fillOpacity: 0.9,
+        }).addTo(map);
+        marker.bindPopup(`<b>Départ ${String.fromCharCode(65 + i)}</b><br>${startAddress}`);
+        boundsPts.push([p.lat, p.lon]);
+      });
+
+      if (destination) {
+        const destinationAddress = escapeHtml(destination.address || '');
+        const marker = L.circleMarker([destination.lat, destination.lon], {
+          radius: 9,
+          color: '#15803d',
+          weight: 2,
+          fillColor: '#16a34a',
+          fillOpacity: 0.95,
+        }).addTo(map);
+        marker.bindPopup(`<b>Destination</b><br>${destinationAddress}`);
+        boundsPts.push([destination.lat, destination.lon]);
+      }
+
+      if (meetingPoint) {
+        const meetingAddress = escapeHtml(meetingPoint.address || '');
+        const marker = L.circleMarker([meetingPoint.lat, meetingPoint.lon], {
+          radius: 10,
+          color: '#b45309',
+          weight: 2,
+          fillColor: '#f59e0b',
+          fillOpacity: 0.95,
+        }).addTo(map);
+        marker.bindPopup(`<b>Point final retenu</b><br>${meetingAddress}`);
+        boundsPts.push([meetingPoint.lat, meetingPoint.lon]);
+      }
+
+if (debug.bbox) {
+  if (debug.bbox.corners && debug.bbox.corners.length === 4) {
+    const poly = debug.bbox.corners.map(c => [c.lat, c.lon]);
+    L.polygon(poly, {
+      color: '#0f766e',
+      weight: 2,
+      dashArray: '6 5',
+      fillOpacity: 0.04,
+      fillColor: '#0f766e',
+    }).addTo(map).bindPopup('Bounding box orientée');
+  } else {
+    const { minLat, minLon, maxLat, maxLon } = debug.bbox;
+    L.rectangle([[minLat, minLon], [maxLat, maxLon]], {
+      color: '#0f766e',
+      weight: 2,
+      dashArray: '6 5',
+      fillOpacity: 0,
+    }).addTo(map).bindPopup('Bounding box');
+  }
+}
+
+      if (boundsPts.length > 1) {
+        map.fitBounds(L.latLngBounds(boundsPts).pad(0.1));
+      } else if (boundsPts.length === 1) {
+        map.setView(boundsPts[0], 12);
+      } else {
+        map.setView([46.6, 2.2], 6);
+      }
+    })();
+  </script>
+</body>
+</html>

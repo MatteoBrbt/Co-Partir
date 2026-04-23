@@ -33,7 +33,7 @@ Puis ouvrir:
 
 1. L'utilisateur saisit au moins 2 departs + 1 destination
 2. `app.js` envoie la requete a `/api/calculate-meeting-point`
-3. La reponse est stockee dans `sessionStorage` (`covoipoint_result`)
+3. La reponse est stockee dans `sessionStorage` (`copartir_result`)
 4. Redirection vers `result.html` (ou `testBox/resultTest.html` en mode dev)
 5. `result.html` lit le payload et affiche carte, stats et trajets
 

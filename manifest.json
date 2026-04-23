@@ -1,6 +1,6 @@
 {
-  "name": "CovoiPoint",
-  "short_name": "CovoiPoint",
+  "name": "CoPartir",
+  "short_name": "CoPartir",
   "description": "Trouvez le meilleur point de rendez-vous pour votre covoiturage.",
   "start_url": "/",
   "display": "standalone",

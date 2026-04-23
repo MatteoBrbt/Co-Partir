@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CovoiPoint - Test candidats</title>
+  <title>CoPartir - Test candidats</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     * { box-sizing: border-box; }
@@ -111,7 +111,7 @@
           .replace(/'/g, '&#39;');
       }
 
-      const raw = sessionStorage.getItem('covoipoint_result');
+      const raw = sessionStorage.getItem('copartir_result');
       if (!raw) {
         document.getElementById('root').innerHTML = '<div class="no-data">Aucun résultat en session. Lance un calcul depuis la page d\'accueil.</div>';
         return;

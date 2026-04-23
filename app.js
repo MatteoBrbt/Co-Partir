@@ -18,26 +18,24 @@ const PLACEHOLDERS = [
   'Ex : Saint-Nazaire, 44600',
 ];
 
-const DEV_MODE_KEY = 'covoipoint_dev_mode';
+const DEV_MODE_KEY = 'copartir_dev_mode';
 const API_BASE_URL = (() => {
   const normalize = (url) => String(url || '').trim().replace(/\/+$/, '');
 
-  // Optional manual override (useful for testing against remote/staging API).
   try {
-    const override = normalize(localStorage.getItem('covoipoint_api_base_url'));
+    const override = normalize(localStorage.getItem('copartir_api_base_url'));
     if (override) return override;
   } catch {}
 
-  const { protocol, hostname, origin, port } = window.location;
+  const { protocol, hostname, port } = window.location;
   const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
 
-  // Typical local setup: front on :3000, backend on :3001.
-  if (isLocal && port !== '3001') {
+  if (isLocal) {
     return `${protocol}//${hostname}:3001`;
   }
 
-  // Default: same-origin API (works behind reverse proxy / single host deploys).
-  return origin;
+  // Production : pointe vers le backend Render
+  return 'https://backpackir.onrender.com';
 })();
 
 let count = 0;
@@ -163,7 +161,7 @@ async function handleSubmit() {
       throw new Error(data?.error || `Erreur API (${response.status})`);
     }
 
-    sessionStorage.setItem('covoipoint_result', JSON.stringify(data));
+    sessionStorage.setItem('copartir_result', JSON.stringify(data));
     window.location.href = buildResultPageUrl(devModeEnabled);
   } catch (err) {
     hideLoading();

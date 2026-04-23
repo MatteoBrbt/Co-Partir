@@ -1,4 +1,4 @@
-const CACHE_NAME = 'covoipoint-v5';
+const CACHE_NAME = 'copartir-v5';
 const ASSETS = [
   '/',
   '/index.html',

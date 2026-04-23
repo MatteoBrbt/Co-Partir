@@ -1,5 +1,8 @@
 'use strict';
 
+// Wake up backend ASAP
+fetch(`https://backpackir.onrender.com/api/health`).catch(() => {});
+
 const COLORS = [
   { bg: '#e6f1fb', text: '#185FA5', letter: 'A' },
   { bg: '#e1f5ee', text: '#0F6E56', letter: 'B' },

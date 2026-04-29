@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#ffffff" />
-  <title>CoPartir — Résultat</title>
+  <title>Co'Partir — Résultat</title>
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
@@ -556,17 +556,6 @@
       return formatScore(perHead, currentMode);
     }
 
-    /**
-     * Estime le temps de trajet commun (point de ralliement → destination)
-     * à partir des données de route si disponibles.
-     */
-    function estimateSharedLegTime(routes) {
-      if (!routes || !routes[0]?.toDestination) return null;
-      // On ne peut pas connaître le temps exact sans données ORS sur ce tronçon.
-      // On retourne null pour ne pas afficher une valeur fausse.
-      return null;
-    }
-
     // ── Palette ───────────────────────────────────────────────
     const AVATAR_COLORS = [
       { bg: '#e6f1fb', text: '#185FA5' },
@@ -602,15 +591,18 @@
     // ── Sidebar ───────────────────────────────────────────────
     const n = startPoints.length;
     const collectiveScore = stats?.totalDetourKm ?? meetingPoint.detourKm;
-    const perParticipantText = detourPerParticipant(collectiveScore, n, mode);
-
+    const perParticipantText = meetingPoint.detourPerParticipant
+      ?? detourPerParticipant(collectiveScore, n, mode);
     // Label for mode
     const modeLabel = mode === 'fast' ? 'par participant' : 'par participant';
     const modeIcon  = mode === 'fast' ? '⏱' : '📏';
     const modeUnit  = mode === 'fast' ? 'détour estimé' : 'distance supplémentaire';
 
     // Shared leg label
-    const sharedLegText = '→ Destination commune';
+    const sharedLeg = data.sharedLeg;
+    const sharedLegDisplay = mode === 'fast'
+      ? (sharedLeg?.durationFormatted ?? '—')
+      : (sharedLeg?.distanceKm != null ? `${sharedLeg.distanceKm} km` : '—');
 
     const destinationAddressText = destination.address || `${destination.lat.toFixed(4)}, ${destination.lon.toFixed(4)}`;
     const safePlaceTypeLabel = escapeHtml(placeTypeLabel || 'Parking public / municipal');
@@ -655,7 +647,7 @@
           </div>
           <div class="detour-stat">
             <div class="detour-stat-label">🚗 Trajet commun</div>
-            <div class="detour-stat-value" id="shared-leg-value">—</div>
+            <div class="detour-stat-value" id="shared-leg-value">${sharedLegDisplay}</div>
             <div class="detour-stat-sub">rallye → destination</div>
           </div>
         </div>

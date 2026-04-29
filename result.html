@@ -6,8 +6,6 @@
   <meta name="theme-color" content="#ffffff" />
   <title>CoPartir — Résultat</title>
   <link rel="icon" href="icons/icon-192.png" />
-
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
@@ -101,7 +99,7 @@
     }
     @media (min-width: 768px) {
       .sidebar {
-        width: 320px;
+        width: 340px;
         border-top: none;
         border-left: 1px solid var(--border);
       }
@@ -123,23 +121,46 @@
       margin-bottom: 6px;
     }
     .meeting-address {
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 700;
       color: var(--blue-dk);
       line-height: 1.3;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
-    .detour-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
+
+    /* ── Détour stats row ─────────────────────────────────── */
+    .detour-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .detour-stat {
       background: white;
-      border-radius: 20px;
-      padding: 4px 10px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--blue-dk);
+      border-radius: 10px;
+      padding: 9px 11px;
       border: 1px solid #bfdbfe;
+    }
+    .detour-stat-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #6b93c4;
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .detour-stat-value {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--blue-dk);
+      line-height: 1;
+    }
+    .detour-stat-sub {
+      font-size: 11px;
+      color: #6b93c4;
+      margin-top: 2px;
     }
 
     /* ── Section titles ───────────────────────────────────── */
@@ -151,6 +172,120 @@
       color: var(--muted);
       padding-bottom: 6px;
       border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Meeting point switcher ───────────────────────────── */
+    .meeting-switcher {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .switcher-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      background: var(--card);
+      position: relative;
+      text-align: left;
+      width: 100%;
+    }
+    .switcher-card:hover {
+      border-color: #93c5fd;
+      background: #f0f7ff;
+      transform: translateX(2px);
+    }
+    .switcher-card.active {
+      border-color: var(--blue);
+      background: #e6f1fb;
+      box-shadow: 0 0 0 3px rgba(55, 138, 221, 0.12);
+    }
+    .switcher-card.active .switcher-card-name {
+      color: var(--blue-dk);
+      font-weight: 700;
+    }
+    .switcher-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .switcher-dot.optimal {
+      background: #fef3c7;
+      color: #b45309;
+    }
+    .switcher-dot.nearby {
+      background: #f0fdf4;
+      color: #15803d;
+    }
+    .switcher-card-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .switcher-card-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .switcher-card-dist {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+    .switcher-card-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+    .switcher-card-badge.recommended {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+    .switcher-card-badge.nearby-badge {
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+    .switcher-active-check {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      background: var(--blue);
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .switcher-card.active .switcher-active-check {
+      display: flex;
+    }
+    .switcher-tip {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      padding: 4px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
     }
 
     /* ── Point rows ───────────────────────────────────────── */
@@ -218,16 +353,6 @@
       border-radius: 2px;
       flex-shrink: 0;
     }
-    .legend-line.dashed {
-      background: repeating-linear-gradient(
-        90deg,
-        currentColor 0px,
-        currentColor 8px,
-        transparent 8px,
-        transparent 14px
-      );
-    }
-    /* ORS / Haversine badge */
     .ors-badge {
       display: inline-flex;
       align-items: center;
@@ -323,6 +448,30 @@
       background: none;
       border: none;
     }
+
+    /* ── Map transition feedback ──────────────────────────── */
+    .map-switch-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: rgba(24, 95, 165, 0.93);
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 18px;
+      border-radius: 20px;
+      z-index: 9999;
+      pointer-events: none;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      opacity: 0;
+      white-space: nowrap;
+      backdrop-filter: blur(4px);
+    }
+    .map-switch-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
@@ -340,10 +489,7 @@
   </div>
 
   <div class="page">
-    <!-- Map -->
     <div id="map"></div>
-
-    <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
       <div class="no-data" id="no-data" style="display:none;">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#9ca3af" stroke-width="1.5"/><path d="M12 8v4M12 16h.01" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg>
@@ -351,74 +497,77 @@
         <p>Retournez à l'accueil et lancez un calcul.</p>
         <a href="index.html" style="color:#378ADD;font-weight:600;">← Accueil</a>
       </div>
-      <!-- Filled by JS -->
     </div>
   </div>
 
-  <!-- Leaflet JS -->
+  <!-- Toast notification -->
+  <div class="map-switch-toast" id="map-toast"></div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
   (function () {
     const raw = sessionStorage.getItem('copartir_result');
-    if (!raw) {
-      document.getElementById('no-data').style.display = 'flex';
-      return;
-    }
+    if (!raw) { document.getElementById('no-data').style.display = 'flex'; return; }
 
     let data;
-    try {
-      data = JSON.parse(raw);
-    } catch {
-      document.getElementById('no-data').style.display = 'flex';
-      return;
-    }
+    try { data = JSON.parse(raw); } catch { document.getElementById('no-data').style.display = 'flex'; return; }
 
     if (!data?.meetingPoint || !data?.destination || !Array.isArray(data?.startPoints)) {
-      document.getElementById('no-data').style.display = 'flex';
-      return;
+      document.getElementById('no-data').style.display = 'flex'; return;
     }
 
-    const {
-      meetingPoint,
-      destination,
-      startPoints,
-      mode,
-      stats,
-      routes,
-      usedORS,
-      placeTypeLabel,
-      nearbyMeetingSpots,
-    } = data;
+    const { meetingPoint, destination, startPoints, mode, stats, routes, usedORS, placeTypeLabel, nearbyMeetingSpots } = data;
 
-    function escapeHtml(value) {
-      return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+    // ── Helpers ──────────────────────────────────────────────
+    function escapeHtml(v) {
+      return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
 
-    function formatDetourValue(value, currentMode) {
-      if (value == null) return null;
-
+    /**
+     * Formate un score ORS (secondes si mode fast, mètres si mode short)
+     * en chaîne lisible.
+     */
+    function formatScore(value, currentMode) {
+      if (value == null) return '—';
       if (currentMode === 'short') {
-        return typeof value === 'number' ? `${value.toFixed(1)} km` : `${value} km`;
+        const km = typeof value === 'number' ? value / 1000 : parseFloat(value);
+        return isNaN(km) ? String(value) : `${km.toFixed(1)} km`;
       }
-
+      // mode fast : value est en secondes (nombre) ou déjà formaté (string "X min Y")
       if (typeof value === 'string') return value;
-
       const totalSeconds = Math.max(0, Math.round(value));
-      const minutes = Math.floor(totalSeconds / 60);
-      const remainingSeconds = totalSeconds % 60;
-
-      if (minutes <= 0) return `${remainingSeconds}`;
-      return `${minutes} min ${remainingSeconds}`;
+      const m = Math.floor(totalSeconds / 60);
+      const s = totalSeconds % 60;
+      if (m <= 0) return `${s} sec`;
+      return s > 0 ? `${m} min ${s}` : `${m} min`;
     }
 
-    // ─── Palette cohérente avec app.js ─────────────────────────
-    // Ordre : bleu, vert, amber, rose, violet, orange
+    /**
+     * Calcule un détour par participant à partir du score collectif ORS.
+     * Le score ORS = Σ(participant→candidat) + N×(candidat→destination)
+     * On divise par N pour avoir une approximation par tête.
+     */
+    function detourPerParticipant(collectiveScore, n, currentMode) {
+      if (collectiveScore == null || n <= 0) return '—';
+      // Si déjà une string (old format), on ne peut pas diviser
+      if (typeof collectiveScore === 'string') return collectiveScore;
+      const perHead = collectiveScore / n;
+      return formatScore(perHead, currentMode);
+    }
+
+    /**
+     * Estime le temps de trajet commun (point de ralliement → destination)
+     * à partir des données de route si disponibles.
+     */
+    function estimateSharedLegTime(routes) {
+      if (!routes || !routes[0]?.toDestination) return null;
+      // On ne peut pas connaître le temps exact sans données ORS sur ce tronçon.
+      // On retourne null pour ne pas afficher une valeur fausse.
+      return null;
+    }
+
+    // ── Palette ───────────────────────────────────────────────
     const AVATAR_COLORS = [
       { bg: '#e6f1fb', text: '#185FA5' },
       { bg: '#e1f5ee', text: '#0F6E56' },
@@ -427,41 +576,106 @@
       { bg: '#eeedfe', text: '#3C3489' },
       { bg: '#faece7', text: '#993C1D' },
     ];
-    // Couleurs pleine des tracés (même ordre)
-    const ROUTE_COLORS = ['#185FA5', '#0F6E56', '#854F0B', '#993556', '#3C3489', '#993C1D'];
-    // Couleurs des pins départ (légèrement plus claires pour contraster avec les tracés)
-    const PIN_COLORS   = ['#4B8FD6', '#25B888', '#F59E0B', '#EC4899', '#7C6FCD', '#EF6C00'];
+    const ROUTE_COLORS = ['#185FA5','#0F6E56','#854F0B','#993556','#3C3489','#993C1D'];
+    const PIN_COLORS   = ['#4B8FD6','#25B888','#F59E0B','#EC4899','#7C6FCD','#EF6C00'];
 
-    // ── Build sidebar ─────────────────────────────────────────
+    // ── State ─────────────────────────────────────────────────
+    let activeMeetingIdx = 0; // 0 = point calculé, 1..3 = points proches
 
-    const sidebar = document.getElementById('sidebar');
-    const meetingAddressText = meetingPoint.address || `Coordonnées : ${meetingPoint.lat.toFixed(4)}, ${meetingPoint.lon.toFixed(4)}`;
+    // Build the list of all switchable meeting points
+    const allMeetingOptions = [
+      {
+        lat: meetingPoint.lat,
+        lon: meetingPoint.lon,
+        name: meetingPoint.address || `${meetingPoint.lat.toFixed(4)}, ${meetingPoint.lon.toFixed(4)}`,
+        isOptimal: true,
+      },
+      ...(Array.isArray(nearbyMeetingSpots) ? nearbyMeetingSpots : []).slice(0, 3).map(s => ({
+        lat: s.lat,
+        lon: s.lon,
+        name: s.name || `${s.lat.toFixed(4)}, ${s.lon.toFixed(4)}`,
+        distanceKm: s.distanceKm,
+        isOptimal: false,
+      })),
+    ];
+
+    // ── Sidebar ───────────────────────────────────────────────
+    const n = startPoints.length;
+    const collectiveScore = stats?.totalDetourKm ?? meetingPoint.detourKm;
+    const perParticipantText = detourPerParticipant(collectiveScore, n, mode);
+
+    // Label for mode
+    const modeLabel = mode === 'fast' ? 'par participant' : 'par participant';
+    const modeIcon  = mode === 'fast' ? '⏱' : '📏';
+    const modeUnit  = mode === 'fast' ? 'détour estimé' : 'distance supplémentaire';
+
+    // Shared leg label
+    const sharedLegText = '→ Destination commune';
+
     const destinationAddressText = destination.address || `${destination.lat.toFixed(4)}, ${destination.lon.toFixed(4)}`;
-    const detourText = formatDetourValue(meetingPoint.detourKm, mode) || 'n/a';
-    const collectiveDetourText = formatDetourValue(stats?.totalDetourKm, mode) || '—';
     const safePlaceTypeLabel = escapeHtml(placeTypeLabel || 'Parking public / municipal');
 
+    const sidebar = document.getElementById('sidebar');
+
+    // Build switcher cards HTML
+    let switcherHtml = '';
+    allMeetingOptions.forEach((opt, i) => {
+      const dotLabel = opt.isOptimal ? '★' : (i);
+      const dotClass = opt.isOptimal ? 'optimal' : 'nearby';
+      const badge = opt.isOptimal
+        ? `<span class="switcher-card-badge recommended">Recommandé</span>`
+        : `<span class="switcher-card-badge nearby-badge">${opt.distanceKm != null ? opt.distanceKm.toFixed(2) + ' km' : ''}</span>`;
+      const activeClass = i === 0 ? 'active' : '';
+      switcherHtml += `
+        <button class="switcher-card ${activeClass}" data-idx="${i}" onclick="switchMeetingPoint(${i})">
+          <div class="switcher-dot ${dotClass}">${dotLabel}</div>
+          <div class="switcher-card-info">
+            <div class="switcher-card-name">${escapeHtml(opt.name)}</div>
+            <div class="switcher-card-dist">${opt.isOptimal ? 'Point calculé par l\'algorithme' : `${opt.distanceKm != null ? opt.distanceKm.toFixed(2) + ' km du point optimal' : 'Point alternatif'}`}</div>
+          </div>
+          ${badge}
+          <div class="switcher-active-check">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </button>`;
+    });
+
     sidebar.innerHTML = `
+      <!-- Hero point de ralliement -->
       <div class="meeting-hero">
         <div class="meeting-label">📍 Point de ralliement</div>
-        <div class="meeting-address">${escapeHtml(meetingAddressText)}</div>
-        <div class="detour-badge">
-          <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M10 2L2 11h7l-1 7 9-10h-7l1-8z" fill="#185FA5"/></svg>
-          Détour total : ${escapeHtml(detourText)}
+        <div class="meeting-address" id="active-meeting-address">${escapeHtml(allMeetingOptions[0].name)}</div>
+
+        <!-- Détour stats -->
+        <div class="detour-stats">
+          <div class="detour-stat">
+            <div class="detour-stat-label">${modeIcon} Détour estimé</div>
+            <div class="detour-stat-value" id="detour-per-participant">${perParticipantText}</div>
+            <div class="detour-stat-sub">${modeLabel}</div>
+          </div>
+          <div class="detour-stat">
+            <div class="detour-stat-label">🚗 Trajet commun</div>
+            <div class="detour-stat-value" id="shared-leg-value">—</div>
+            <div class="detour-stat-sub">rallye → destination</div>
+          </div>
         </div>
       </div>
 
-      <div class="section-title">Points possibles à proximité</div>
-      <div id="nearby-spots-wrap">
-        ${(Array.isArray(nearbyMeetingSpots) && nearbyMeetingSpots.length > 0)
-          ? `
-            <div class="nearby-spots-meta">Type recherché : ${safePlaceTypeLabel}</div>
-            <div id="nearby-spots-list"></div>
-          `
-          : `<div class="nearby-spots-empty">Aucun lieu proche trouvé pour ce type autour du point calculé.</div>`
+      <!-- Switcher de point de ralliement -->
+      <div>
+        <div class="section-title" style="margin-bottom:10px;">Choisir le point de ralliement</div>
+        ${allMeetingOptions.length > 1
+          ? `<div class="meeting-switcher" id="meeting-switcher">${switcherHtml}</div>
+             <div class="switcher-tip">
+               <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#9ca3af" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg>
+               Cliquez pour repositionner le pin sur la carte
+             </div>`
+          : `<div class="meeting-switcher" id="meeting-switcher">${switcherHtml}</div>
+             <div class="switcher-tip" style="color:#d97706">Aucun lieu alternatif trouvé à proximité</div>`
         }
       </div>
 
+      <!-- Destination -->
       <div class="dest-card">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5z" fill="#1D9E75"/></svg>
         <div>
@@ -470,16 +684,19 @@
         </div>
       </div>
 
+      <!-- Points de départ -->
       <div class="section-title">Points de départ</div>
       <div id="starts-list"></div>
 
+      <!-- Tracés -->
       <div class="section-title">Tracés sur la carte</div>
       <div class="legend" id="route-legend"></div>
 
+      <!-- Stats -->
       <div class="section-title">Statistiques</div>
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-value">${startPoints.length}</div>
+          <div class="stat-value">${n}</div>
           <div class="stat-label">Participants</div>
         </div>
         <div class="stat-card">
@@ -487,8 +704,8 @@
           <div class="stat-label">Candidats évalués</div>
         </div>
         <div class="stat-card">
-          <div class="stat-value">${escapeHtml(collectiveDetourText)}</div>
-          <div class="stat-label">Détour collectif</div>
+          <div class="stat-value">${escapeHtml(formatScore(collectiveScore, mode))}</div>
+          <div class="stat-label">Score collectif</div>
         </div>
         <div class="stat-card">
           <div class="stat-value">${mode === 'fast' ? '⚡ Temps' : '📏 Distance'}</div>
@@ -496,7 +713,7 @@
         </div>
       </div>
 
-      <a class="osm-btn"
+      <a class="osm-btn" id="osm-link"
          href="https://www.openstreetmap.org/?mlat=${meetingPoint.lat}&mlon=${meetingPoint.lon}#map=15/${meetingPoint.lat}/${meetingPoint.lon}"
          target="_blank" rel="noopener">
         Ouvrir dans OpenStreetMap ↗
@@ -508,73 +725,45 @@
     startPoints.forEach((pt, i) => {
       const col    = AVATAR_COLORS[i % AVATAR_COLORS.length];
       const letter = String.fromCharCode(65 + i);
-      const startAddressText = pt.address || `Participant ${letter}`;
       const row    = document.createElement('div');
       row.className = 'point-row';
       row.innerHTML = `
         <div class="point-dot" style="background:${col.bg};color:${col.text}">${letter}</div>
         <div>
-          <div class="point-address">${escapeHtml(startAddressText)}</div>
+          <div class="point-address">${escapeHtml(pt.address || `Participant ${letter}`)}</div>
           <div class="point-coords">${pt.lat.toFixed(5)}, ${pt.lon.toFixed(5)}</div>
         </div>`;
       startsList.appendChild(row);
     });
 
-    // Nearby meeting spots list (max 3)
-    const nearbyList = document.getElementById('nearby-spots-list');
-    if (nearbyList && Array.isArray(nearbyMeetingSpots)) {
-      nearbyMeetingSpots.slice(0, 3).forEach((spot, i) => {
-        const spotName = spot.name || `Point possible ${i + 1}`;
-        const row = document.createElement('div');
-        row.className = 'point-row nearby-spot-row';
-        row.innerHTML = `
-          <div class="point-dot" style="background:#fff4e5;color:#b45309">${i + 1}</div>
-          <div>
-            <div class="point-address">${escapeHtml(spotName)}</div>
-            <div class="point-coords">${spot.lat.toFixed(5)}, ${spot.lon.toFixed(5)} • ${spot.distanceKm.toFixed(2)} km</div>
-          </div>`;
-        nearbyList.appendChild(row);
-      });
-    }
-
     // Route legend
     const legend = document.getElementById('route-legend');
-
-    // ORS / Haversine badge
     const badgeHtml = usedORS
       ? `<span class="ors-badge real">✓ Tracés routiers réels (OpenRouteService)</span>`
       : `<span class="ors-badge approx">~ Tracés approximatifs (lignes droites)</span>`;
-
     let legendHtml = badgeHtml;
-
-    // One legend row per participant
     startPoints.forEach((_, i) => {
       const color  = ROUTE_COLORS[i % ROUTE_COLORS.length];
       const letter = String.fromCharCode(65 + i);
       legendHtml += `
         <div class="legend-row">
           <svg width="32" height="8" style="flex-shrink:0">
-            <line x1="0" y1="4" x2="32" y2="4"
-                  stroke="${color}" stroke-width="3.5"
+            <line x1="0" y1="4" x2="32" y2="4" stroke="${color}" stroke-width="3.5"
                   stroke-dasharray="9 6" stroke-linecap="round"/>
           </svg>
           Participant ${letter} → Ralliement
         </div>`;
     });
-
     legendHtml += `
       <div class="legend-row">
         <svg width="32" height="8" style="flex-shrink:0">
-          <line x1="0" y1="4" x2="32" y2="4"
-                stroke="#1D9E75" stroke-width="4" stroke-linecap="round"/>
+          <line x1="0" y1="4" x2="32" y2="4" stroke="#1D9E75" stroke-width="4" stroke-linecap="round"/>
         </svg>
         Trajet commun → Destination
       </div>`;
-
     legend.innerHTML = legendHtml;
 
-    // ── Build map ─────────────────────────────────────────────
-
+    // ── Map ───────────────────────────────────────────────────
     const allPts = [
       [meetingPoint.lat, meetingPoint.lon],
       [destination.lat,  destination.lon],
@@ -582,86 +771,14 @@
     ];
 
     const map = L.map('map');
-
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
       subdomains: 'abcd',
       maxZoom: 19,
     }).addTo(map);
 
-    // ── Draw routes ───────────────────────────────────────────
-    // Drawn BEFORE markers so markers sit on top
-
-    if (routes && routes.length > 0) {
-      let sharedDrawn = false;
-
-      routes.forEach((route, i) => {
-        const color = ROUTE_COLORS[i % ROUTE_COLORS.length];
-        const letter = String.fromCharCode(65 + i);
-
-        // Départ_i → meeting  (tirets colorés, spécifique à chaque participant)
-        if (route.toMeeting && route.toMeeting.length > 1) {
-          L.polyline(route.toMeeting, {
-            color,
-            weight: 4,
-            opacity: 0.88,
-            dashArray: '10 7',
-            lineJoin: 'round',
-          })
-          .addTo(map)
-          .bindTooltip(`Participant ${letter} → Ralliement`, {
-            sticky: true,
-            className: 'leaflet-tooltip',
-          });
-        }
-
-        // Meeting → destination (trait plein vert, dessiné une seule fois)
-        if (!sharedDrawn && route.toDestination && route.toDestination.length > 1) {
-          L.polyline(route.toDestination, {
-            color: '#1D9E75',
-            weight: 5,
-            opacity: 0.92,
-            lineJoin: 'round',
-          })
-          .addTo(map)
-          .bindTooltip('Trajet commun → Destination', {
-            sticky: true,
-          });
-          sharedDrawn = true;
-        }
-      });
-
-      // Ajuste le zoom pour englober tous les tracés
-      const routePoints = routes.flatMap(r => [
-        ...(r.toMeeting     || []),
-        ...(r.toDestination || []),
-      ]);
-      if (routePoints.length > 1) {
-        map.fitBounds(L.latLngBounds(routePoints).pad(0.1));
-      } else {
-        map.fitBounds(allPts, { padding: [40, 40] });
-      }
-    } else {
-      // Pas de routes : tracés droits de fallback + fitBounds classique
-      startPoints.forEach((sp, i) => {
-        const color = ROUTE_COLORS[i % ROUTE_COLORS.length];
-        L.polyline([[sp.lat, sp.lon], [meetingPoint.lat, meetingPoint.lon]], {
-          color,
-          weight: 3,
-          opacity: 0.6,
-          dashArray: '8 6',
-        }).addTo(map);
-      });
-      L.polyline(
-        [[meetingPoint.lat, meetingPoint.lon], [destination.lat, destination.lon]],
-        { color: '#1D9E75', weight: 4, opacity: 0.75 }
-      ).addTo(map);
-      map.fitBounds(allPts, { padding: [40, 40] });
-    }
-
-    // ── Markers (au-dessus des tracés) ────────────────────────
-
-    function makePin(color, letter, size = 36) {
+    // ── Marker factory ────────────────────────────────────────
+    function makePin(color, label, size = 36) {
       const h = Math.round(size * 1.3);
       const html = `
         <svg width="${size}" height="${h}" viewBox="0 0 36 47" xmlns="http://www.w3.org/2000/svg">
@@ -672,59 +789,140 @@
                 fill="${color}" stroke="white" stroke-width="2" filter="url(#sh)"/>
           <circle cx="18" cy="16" r="9" fill="white" opacity="0.22"/>
           <text x="18" y="21" text-anchor="middle" font-size="12"
-                font-family="system-ui,sans-serif" font-weight="800" fill="white">${letter}</text>
+                font-family="system-ui,sans-serif" font-weight="800" fill="white">${label}</text>
         </svg>`;
-      return L.divIcon({
-        html,
-        className: 'custom-marker',
-        iconSize:   [size, h],
-        iconAnchor: [size / 2, h],
-        popupAnchor: [0, -h],
-      });
+      return L.divIcon({ html, className: 'custom-marker', iconSize: [size, h], iconAnchor: [size/2, h], popupAnchor: [0, -h] });
     }
 
-    // Départs
+    // ── Draw routes ───────────────────────────────────────────
+    if (routes && routes.length > 0) {
+      let sharedDrawn = false;
+      routes.forEach((route, i) => {
+        const color = ROUTE_COLORS[i % ROUTE_COLORS.length];
+        const letter = String.fromCharCode(65 + i);
+        if (route.toMeeting && route.toMeeting.length > 1) {
+          L.polyline(route.toMeeting, { color, weight: 4, opacity: 0.88, dashArray: '10 7', lineJoin: 'round' })
+            .addTo(map)
+            .bindTooltip(`Participant ${letter} → Ralliement`, { sticky: true });
+        }
+        if (!sharedDrawn && route.toDestination && route.toDestination.length > 1) {
+          L.polyline(route.toDestination, { color: '#1D9E75', weight: 5, opacity: 0.92, lineJoin: 'round' })
+            .addTo(map)
+            .bindTooltip('Trajet commun → Destination', { sticky: true });
+          sharedDrawn = true;
+
+          // Estimate shared leg duration from polyline point count as rough proxy
+          // Real duration would require an ORS call — we skip that here
+        }
+      });
+      const routePoints = routes.flatMap(r => [...(r.toMeeting||[]), ...(r.toDestination||[])]);
+      if (routePoints.length > 1) {
+        map.fitBounds(L.latLngBounds(routePoints).pad(0.1));
+      } else {
+        map.fitBounds(allPts, { padding: [40, 40] });
+      }
+    } else {
+      startPoints.forEach((sp, i) => {
+        L.polyline([[sp.lat, sp.lon], [meetingPoint.lat, meetingPoint.lon]], {
+          color: ROUTE_COLORS[i % ROUTE_COLORS.length], weight: 3, opacity: 0.6, dashArray: '8 6',
+        }).addTo(map);
+      });
+      L.polyline([[meetingPoint.lat, meetingPoint.lon], [destination.lat, destination.lon]],
+        { color: '#1D9E75', weight: 4, opacity: 0.75 }).addTo(map);
+      map.fitBounds(allPts, { padding: [40, 40] });
+    }
+
+    // ── Static markers: starts + destination ──────────────────
     startPoints.forEach((pt, i) => {
       const letter = String.fromCharCode(65 + i);
-      const color  = PIN_COLORS[i % PIN_COLORS.length];
-      const startPopupAddress = escapeHtml(pt.address || '');
-      L.marker([pt.lat, pt.lon], { icon: makePin(color, letter), zIndexOffset: 100 })
+      L.marker([pt.lat, pt.lon], { icon: makePin(PIN_COLORS[i % PIN_COLORS.length], letter), zIndexOffset: 100 })
         .addTo(map)
-        .bindPopup(`<b>Départ ${letter}</b><br>${startPopupAddress}`, { maxWidth: 240 });
+        .bindPopup(`<b>Départ ${letter}</b><br>${escapeHtml(pt.address || '')}`, { maxWidth: 240 });
     });
 
-    // Destination
-    const destinationPopupAddress = escapeHtml(destination.address || '');
-    L.marker([destination.lat, destination.lon], {
-      icon: makePin('#1D9E75', '🏁', 38),
-      zIndexOffset: 200,
-    })
-    .addTo(map)
-    .bindPopup(`<b>Destination</b><br>${destinationPopupAddress}`, { maxWidth: 240 })
-    .openPopup();
+    L.marker([destination.lat, destination.lon], { icon: makePin('#1D9E75', '🏁', 38), zIndexOffset: 200 })
+      .addTo(map)
+      .bindPopup(`<b>Destination</b><br>${escapeHtml(destination.address || '')}`, { maxWidth: 240 })
+      .openPopup();
 
-    // Point de ralliement — cercle de zone + pin étoile
-    L.circle([meetingPoint.lat, meetingPoint.lon], {
-      radius: 800,
-      color: '#D97706',
-      fillColor: '#FCD34D',
-      fillOpacity: 0.15,
-      weight: 2,
-      dashArray: '6 4',
+    // ── Meeting point marker (mutable) ────────────────────────
+    let meetingCircle = L.circle([meetingPoint.lat, meetingPoint.lon], {
+      radius: 800, color: '#D97706', fillColor: '#FCD34D', fillOpacity: 0.15, weight: 2, dashArray: '6 4',
     }).addTo(map);
 
-    L.marker([meetingPoint.lat, meetingPoint.lon], {
+    let meetingMarker = L.marker([meetingPoint.lat, meetingPoint.lon], {
       icon: makePin('#D97706', '★', 44),
       zIndexOffset: 300,
-    })
-    .addTo(map)
-    .bindPopup(
+    }).addTo(map).bindPopup(
       `<b>📍 Point de ralliement</b><br>${escapeHtml(meetingPoint.address || '')}<br>` +
-      (meetingPoint.detourKm != null
-        ? `Détour collectif : <b>${escapeHtml(formatDetourValue(meetingPoint.detourKm, mode))}</b>`
-        : ''),
+      (collectiveScore != null ? `Détour ${modeIcon} : <b>${escapeHtml(perParticipantText)}</b> par participant` : ''),
       { maxWidth: 260 }
     );
+
+    // ── Nearby spot markers (ghost, shown when active) ────────
+    const nearbyMarkers = allMeetingOptions.slice(1).map((opt, i) => {
+      const idx = i + 1;
+      const marker = L.marker([opt.lat, opt.lon], {
+        icon: makePin('#6b7280', String(idx), 32),
+        zIndexOffset: 150,
+        opacity: 0.45,
+      }).addTo(map)
+        .bindPopup(`<b>Point alternatif ${idx}</b><br>${escapeHtml(opt.name)}<br>${opt.distanceKm != null ? opt.distanceKm.toFixed(2) + ' km du point optimal' : ''}`, { maxWidth: 240 });
+      return marker;
+    });
+
+    // ── Toast helper ──────────────────────────────────────────
+    let toastTimer = null;
+    function showToast(msg) {
+      const el = document.getElementById('map-toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+    }
+
+    // ── Switch meeting point ───────────────────────────────────
+    window.switchMeetingPoint = function(idx) {
+      if (idx === activeMeetingIdx) return;
+      activeMeetingIdx = idx;
+
+      const opt = allMeetingOptions[idx];
+
+      // Update sidebar cards
+      document.querySelectorAll('.switcher-card').forEach(card => {
+        card.classList.toggle('active', parseInt(card.dataset.idx) === idx);
+      });
+
+      // Update hero address
+      document.getElementById('active-meeting-address').textContent = opt.name;
+
+      // Update OSM link
+      document.getElementById('osm-link').href =
+        `https://www.openstreetmap.org/?mlat=${opt.lat}&mlon=${opt.lon}#map=15/${opt.lat}/${opt.lon}`;
+
+      // Move meeting marker + circle
+      const latlng = L.latLng(opt.lat, opt.lon);
+      meetingMarker.setLatLng(latlng);
+      meetingMarker.setPopupContent(
+        `<b>📍 Point de ralliement</b><br>${escapeHtml(opt.name)}` +
+        (idx === 0 && collectiveScore != null ? `<br>Détour ${modeIcon} : <b>${escapeHtml(perParticipantText)}</b> par participant` : '')
+      );
+      meetingCircle.setLatLng(latlng);
+
+      // Highlight / dim nearby markers
+      nearbyMarkers.forEach((m, i) => {
+        const isActive = (i + 1) === idx;
+        m.setOpacity(isActive ? 0 : 0.45); // hide the selected one (it's now the main pin)
+        m.setZIndexOffset(isActive ? 0 : 150);
+      });
+
+      // Pan to new location
+      map.flyTo(latlng, Math.max(map.getZoom(), 13), { duration: 0.8 });
+
+      // Toast
+      const label = idx === 0 ? 'Point recommandé' : `Point alternatif ${idx}`;
+      showToast(`📍 ${label} sélectionné`);
+    };
 
   })();
   </script>
